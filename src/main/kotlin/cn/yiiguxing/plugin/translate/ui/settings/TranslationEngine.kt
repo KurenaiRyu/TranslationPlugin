@@ -11,6 +11,9 @@ import cn.yiiguxing.plugin.translate.trans.baidu.BaiduTranslator
 import cn.yiiguxing.plugin.translate.trans.deepl.DeeplCredential
 import cn.yiiguxing.plugin.translate.trans.deepl.DeeplSettingsDialog
 import cn.yiiguxing.plugin.translate.trans.deepl.DeeplTranslator
+import cn.yiiguxing.plugin.translate.trans.deeplx.DdeeplxSettings
+import cn.yiiguxing.plugin.translate.trans.deeplx.DeeplxSettingsDialog
+import cn.yiiguxing.plugin.translate.trans.deeplx.DeeplxTranslator
 import cn.yiiguxing.plugin.translate.trans.google.GoogleSettingsDialog
 import cn.yiiguxing.plugin.translate.trans.google.GoogleTranslator
 import cn.yiiguxing.plugin.translate.trans.microsoft.MicrosoftTranslator
@@ -24,6 +27,7 @@ import cn.yiiguxing.plugin.translate.trans.youdao.YoudaoTranslator
 import cn.yiiguxing.plugin.translate.ui.AppKeySettingsDialog
 import cn.yiiguxing.plugin.translate.ui.AppKeySettingsPanel
 import com.intellij.openapi.components.service
+import com.jetbrains.rd.framework.base.deepClonePolymorphic
 import icons.TranslationIcons
 import java.util.*
 import javax.swing.Icon
@@ -47,6 +51,13 @@ enum class TranslationEngine(
     BAIDU("fanyi.baidu", message("translation.engine.baidu.name"), TranslationIcons.Engines.Baidu, 10000, 1000),
     ALI("translate.ali", message("translation.engine.ali.name"), TranslationIcons.Engines.Ali, 5000),
     DEEPL("translate.deepl", message("translation.engine.deepl.name"), TranslationIcons.Engines.Deepl, 131072, 1000),
+    DEEPLX(
+        "translate.deeplx",
+        message("translation.engine.deeplx.name"),
+        TranslationIcons.Engines.Deeplx,
+        131072,
+        1000
+    ),
     OPEN_AI(
         "translate.openai",
         message("translation.engine.openai.name"),
@@ -75,6 +86,7 @@ enum class TranslationEngine(
                 BAIDU -> BaiduTranslator
                 ALI -> AliTranslator
                 DEEPL -> DeeplTranslator
+                DEEPLX -> DeeplxTranslator
                 OPEN_AI -> OpenAiTranslator
             }
         }
@@ -95,6 +107,7 @@ enum class TranslationEngine(
             BAIDU -> isConfigured(settings.baiduTranslateSettings)
             ALI -> isConfigured(settings.aliTranslateSettings)
             DEEPL -> DeeplCredential.isAuthKeySet
+            DEEPLX -> !service<DdeeplxSettings>().apiEndpoint.isNullOrEmpty()
             OPEN_AI -> service<OpenAiSettings>().let {
                 it.isConfigured(ConfigType.TRANSLATOR) && OpenAiCredentials.isCredentialSet(it.provider)
             }
@@ -129,6 +142,7 @@ enum class TranslationEngine(
 
             GOOGLE -> GoogleSettingsDialog().showAndGet()
             DEEPL -> DeeplSettingsDialog().showAndGet()
+            DEEPLX -> DeeplxSettingsDialog().showAndGet()
             OPEN_AI -> OpenAISettingsDialog(ConfigType.TRANSLATOR).showAndGet()
 
             else -> true
